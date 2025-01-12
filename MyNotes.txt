@@ -1,0 +1,7 @@
+background.js - Handles extension initialization and tab management
+manifest.json - Extension configuration
+styles.css - Styling for highlights and UI elements
+content.js - Core highlighting functionality with new editing features
+popup.html - User interface with editing controls
+popup.js - Popup window logic with editing functionality
+

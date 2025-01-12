@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 350px;
+      max-height: 500px;
+      padding: 16px;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    
+    .controls {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .search-box:focus {
+      border-color: #2196F3;
+    }
+
+    .filter-select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: white;
+      outline: none;
+    }
+
+    .filter-select:focus {
+      border-color: #2196F3;
+    }
+    
+    .highlight-container {
+      max-height: 350px;
+      overflow-y: auto;
+      margin-top: 16px;
+      padding-right: 4px;
+    }
+
+    .highlight-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .highlight-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    .highlight-container::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+    
+    .highlight-item {
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      padding: 12px;
+      margin-bottom: 8px;
+      position: relative;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .highlight-text {
+      margin-bottom: 24px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      word-wrap: break-word;
+      tab-size: 4;
+      -moz-tab-size: 4;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .button-group {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .delete-btn, .edit-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+      z-index: 2;
+    }
+    
+    .delete-btn {
+      color: #ff4444;
+    }
+    
+    .delete-btn:hover {
+      background-color: rgba(255, 68, 68, 0.1);
+    }
+
+    .edit-btn {
+      color: #2196F3;
+    }
+
+    .edit-btn:hover {
+      background-color: rgba(33, 150, 243, 0.1);
+    }
+
+    .highlight-item.selected {
+      border-color: #4CAF50;
+    }
+
+    .highlight-item.editing {
+      background-color: #fff;
+      border-color: #2196F3;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .highlight-item.editing .highlight-text {
+      display: none;
+    }
+
+    .highlight-text-editor {
+      width: 100%;
+      min-height: 60px;
+      padding: 8px;
+      margin: 4px 0 8px 0;
+      border: 1px solid #2196F3;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.4;
+      resize: vertical;
+      box-sizing: border-box;
+      display: none;
+      outline: none;
+    }
+
+    .highlight-item.editing .highlight-text-editor {
+      display: block;
+    }
+
+    .edit-controls {
+      display: none;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .highlight-item.editing .edit-controls {
+      display: flex;
+    }
+    
+    .highlight-url {
+      font-size: 12px;
+      color: #666;
+      word-wrap: break-word;
+      margin-top: 4px;
+    }
+
+    .highlight-timestamp {
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+    }
+    
+    .action-button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+      flex: 1;
+      transition: background-color 0.2s;
+    }
+
+    .clear-all {
+      background-color: #ff4444;
+      color: white;
+    }
+    
+    .clear-all:hover {
+      background-color: #ff0000;
+    }
+
+    .merge-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .merge-btn:hover {
+      background-color: #45a049;
+    }
+
+    .merge-btn:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    .no-highlights {
+      text-align: center;
+      color: #666;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    .save-btn, .cancel-btn {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .save-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .save-btn:hover {
+      background-color: #45a049;
+    }
+
+    .cancel-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .cancel-btn:hover {
+      background-color: #da190b;
+    }
+
+    .merged-container {
+      display: none;
+      margin-top: 16px;
+      border-top: 1px solid #ddd;
+      padding-top: 16px;
+    }
+
+    .merged-container.show {
+      display: block;
+    }
+
+    .merged-text {
+      width: 100%;
+      min-height: 100px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.4;
+      resize: vertical;
+      box-sizing: border-box;
+      margin-bottom: 8px;
+      outline: none;
+    }
+
+    .copy-btn {
+      background-color: #2196F3;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+
+    .copy-btn:hover {
+      background-color: #1976D2;
+    }
+
+    button:focus-visible {
+      outline: 2px solid #2196F3;
+      outline-offset: 2px;
+    }
+
+    button {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <input type="text" id="searchHighlights" class="search-box" placeholder="Search highlights...">
+    <select id="filterByDomain" class="filter-select">
+      <option value="all">All Domains</option>
+    </select>
+    <div class="button-row">
+      <button class="action-button clear-all" id="clearAll">Clear All</button>
+      <button class="action-button merge-btn" id="mergeSelected" disabled>Merge Selected</button>
+    </div>
+  </div>
+  <div class="merged-container" id="mergedContainer">
+    <textarea class="merged-text" id="mergedText" readonly></textarea>
+    <button class="copy-btn" id="copyMerged">Copy to Clipboard</button>
+  </div>
+  <div class="highlight-container" id="highlightContainer">
+    <!-- Highlights will be inserted here -->
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
